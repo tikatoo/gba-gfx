@@ -1,26 +1,14 @@
+local export = require('export')
+
+-- This module is temporary, and will be tidied up in the next commit.
 local misc = {}
 
 function misc.newtile(v)
-    if v ==  nil then v = 0 end
-    return {
-        v, v, v, v, v, v, v, v,
-        v, v, v, v, v, v, v, v,
-        v, v, v, v, v, v, v, v,
-        v, v, v, v, v, v, v, v,
-        v, v, v, v, v, v, v, v,
-        v, v, v, v, v, v, v, v,
-        v, v, v, v, v, v, v, v,
-        v, v, v, v, v, v, v, v,
-    }
+    return export.tile(nil, v)
 end
 
-function misc.newpalette() 
-    return {
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {31, 31, 31},
-    }
+function misc.newpalette()
+    return export.palette()
 end
 
 return misc
