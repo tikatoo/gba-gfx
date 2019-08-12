@@ -20,9 +20,23 @@ function love.load()
         40, 40 + 4 * palette.scale + 40, 16
     ))
 
-    local tile
-    palette.palette, tile = export.load()
-    canvas:settile(tile)
+    local settings, palettes, tiles = export.load()
+    if settings == nil then
+        -- palettes is the error message
+        print('load error', palettes)
+        -- Just continue anyway, with blank file.
+        palettes = {}
+        tiles = {}
+    end
+    if #palettes < 1 then
+        table.insert(palettes, export.palette())
+    end
+    if #tiles < 1 then
+        table.insert(tiles, export.tile())
+    end
+
+    palette.palette = palettes[1]
+    canvas:settile(tiles[1])
     canvas.palette = palette.palette
     canvas.selected = palette.selected
     function palette.onselect(n)
@@ -35,7 +49,7 @@ function love.load()
 end
 
 function love.quit()
-    export.save(ui.palette.palette, ui.canvas.tile)
+    export.save({}, {ui.palette.palette}, {ui.canvas.tile})
 end
 
 function love.update(dt)
