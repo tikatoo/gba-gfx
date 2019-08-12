@@ -24,6 +24,9 @@ function love.load()
     if settings == nil then
         -- palettes is the error message
         print('load error', palettes)
+        local savedir = love.filesystem.getSaveDirectory()
+        love.filesystem.remove('savedata.bad.gfx')
+        os.rename(savedir .. '/savedata.gfx', savedir .. '/savedata.bad.gfx')
         -- Just continue anyway, with blank file.
         palettes = {}
         tiles = {}
