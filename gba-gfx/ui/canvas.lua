@@ -1,14 +1,13 @@
 local UIWidget = require('ui.widget')
 local draw = require('ui.drawutil')
-local misc = require('misc')
 
 local UICanvas = UIWidget:extend()
 function UICanvas:init(x, y, scale)
     UIWidget.init(self, x, y, 8 * scale, 8 * scale)
     self.scale = scale
     self.tile = nil
-    self.tileundo = misc.newtile()
-    self.tilestroke = misc.newtile(false)
+    self.tileundo = export.tile()
+    self.tilestroke = export.tile(nil, false)
     self.palette = nil
     self.selected = 0
     self.painting = false
@@ -16,7 +15,7 @@ end
 
 function UICanvas:settile(tile)
     self.tile = tile
-    self.tileundo = misc.newtile()
+    self.tileundo = export.tile()
 end
 
 function UICanvas:draw()
@@ -83,7 +82,7 @@ function UICanvas:mousereleased(x, y, btn, istouch, presses)
 
     if btn == 1 or btn == 2 then
         self.painting = false
-        self.tilestroke = misc.newtile(false)
+        self.tilestroke = export.tile(nil, false)
     end
 end
 
