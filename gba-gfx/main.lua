@@ -7,6 +7,7 @@ local UICanvas = require('ui.canvas')
 local draw = require('ui.drawutil')
 
 local ui = nil
+local data = nil
 
 function love.load()
     ui = UIRoot:new()
@@ -20,39 +21,43 @@ function love.load()
         40, 40 + 4 * palette.scale + 40, 16
     ))
 
-    local settings, palettes, tiles = export.load()
-    if settings == nil then
-        -- palettes is the error message
-        print('load error', palettes)
-        local savedir = love.filesystem.getSaveDirectory()
-        love.filesystem.remove('savedata.bad.gfx')
-        os.rename(savedir .. '/savedata.gfx', savedir .. '/savedata.bad.gfx')
-        -- Just continue anyway, with blank file.
-        palettes = {}
-        tiles = {}
+    local errmsg
+    data, errmsg = export.load('savedata.gfx')
+    if data == nil then
+        print('load error', errmsg)
+        if love.filesystem.getInfo('savedata.gfx', 'file') ~= nil then
+            -- The file exists, but is broken.
+            -- Give users the chance to fix the file.
+            local savedir = love.filesystem.getSaveDirectory()
+            love.filesystem.remove('savedata.bad.gfx')
+            os.rename(savedir .. '/savedata.gfx', savedir .. '/savedata.bad.gfx')
+        end
+        -- Just continue anyway, with blank data.
+        data = {
+            settings = {},
+            palettes = {},
+            tiles = {},
+        }
     end
-    if #palettes < 1 then
-        table.insert(palettes, export.palette())
+    if #data.palettes < 1 then
+        table.insert(data.palettes, export.palette())
     end
-    if #tiles < 1 then
-        table.insert(tiles, export.tile())
+    if #data.tiles < 1 then
+        table.insert(data.tiles, export.tile())
     end
 
-    palette.palette = palettes[1]
-    canvas:settile(tiles[1])
+    palette.palette = data.palettes[1]
+    canvas:settile(data.tiles[1])
     canvas.palette = palette.palette
     canvas.selected = palette.selected
     function palette.onselect(n)
         picker:setcolor(palette.palette[n])
         canvas.selected = n
     end
-
-    ui.palette = palette
-    ui.canvas = canvas
 end
 
 function love.quit()
-    export.save({}, {ui.palette.palette}, {ui.canvas.tile})
+    export.save('savedata.gfx', data)
 end
 
 function love.update(dt)

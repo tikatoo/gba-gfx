@@ -94,20 +94,20 @@ function export.tile(tile, v)
     end
 end
 
-function export.save(settings, palettes, tiles)
-    local file, msg = love.filesystem.newFile('savedata.gfx', 'w')
+function export.save(filename, data)
+    local file, msg = love.filesystem.newFile(filename, 'w')
     if not file then return file, msg end
     local status
 
     status, msg = file:write('% gba-gfx\n')
     if not status then return status, msg end
 
-    for i, palette in ipairs(palettes) do
+    for i, palette in ipairs(data.palettes) do
         status, msg = file:write('p ' .. export.palette(palette) .. '\n')
         if not status then return status, msg end
     end
 
-    for i, tile in ipairs(tiles) do
+    for i, tile in ipairs(data.tiles) do
         status, msg = file:write('t ' .. export.tile(tile) .. '\n')
         if not status then return status, msg end
     end
@@ -116,16 +116,13 @@ function export.save(settings, palettes, tiles)
     return true
 end
 
-function export.load()
-    local palettes = {}
-    local tiles = {}
-
-    local file, msg = love.filesystem.newFile('savedata.gfx', 'r')
+function export.load(filename)
+    local file, msg = love.filesystem.newFile(filename, 'r')
     if file == nil then
         return nil, msg
     end
 
-    local settings = nil
+    local data = nil
     local i = 1
     for line in file:lines() do
         if line:sub(2, 2) ~= ' ' then
@@ -134,7 +131,7 @@ function export.load()
         end
 
         local prefix = line:sub(1, 1)
-        if settings == nil and prefix ~= '%' then
+        if data == nil and prefix ~= '%' then
             return nil, "invalid file format at line " .. i
                 .. " (expected % at col 1)"
         end
@@ -145,13 +142,17 @@ function export.load()
                 return nil, "invalid file format at line " .. i
                     .. " (expected file header)"
             end
-            settings = {}
+            data = {
+                settings = {},
+                palettes = {},
+                tiles = {},
+            }
         elseif prefix == 'p' then
             local encoded = line:sub(3)
-            table.insert(palettes, export.palette(encoded))
+            table.insert(data.palettes, export.palette(encoded))
         elseif prefix == 't' then
             local encoded = line:sub(3)
-            table.insert(tiles, export.tile(encoded))
+            table.insert(data.tiles, export.tile(encoded))
         else
             return nil, "invalid file format at line " .. i
                 .. " (unknown command)"
@@ -161,7 +162,7 @@ function export.load()
     end
 
     file:close()
-    return settings, palettes, tiles
+    return data
 end
 
 return export
