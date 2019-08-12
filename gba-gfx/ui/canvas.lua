@@ -1,5 +1,6 @@
 local UIWidget = require('ui.widget')
 local draw = require('ui.drawutil')
+local export = require('export')
 
 local UICanvas = UIWidget:extend()
 function UICanvas:init(x, y, scale)
