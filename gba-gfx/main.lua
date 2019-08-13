@@ -37,6 +37,7 @@ function love.load()
             settings = {},
             palettes = {},
             tiles = {},
+            objs = {},
         }
     end
     if #data.palettes < 1 then
@@ -45,9 +46,14 @@ function love.load()
     if #data.tiles < 1 then
         table.insert(data.tiles, export.tile())
     end
+    if #data.objs < 1 then
+        table.insert(data.objs, { w = 1, h = 1, palette = 0, tile = 0 })
+    end
 
-    palette.palette = data.palettes[1]
-    canvas:settile(data.tiles[1])
+    local obj = data.objs[1]
+
+    palette.palette = data.palettes[obj.palette + 1]
+    canvas:settile(data.tiles[obj.tile + 1])
     canvas.palette = palette.palette
     canvas.selected = palette.selected
     function palette.onselect(n)
