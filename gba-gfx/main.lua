@@ -12,7 +12,7 @@ local data = nil
 function love.load()
     ui = UIRoot:new()
     ui:add(UIShow:new({0.15, 0.15, 0.15}))
-    local palette = ui:add(UIPalette:new(40, 40, 20))
+    local palette = ui:add(UIPalette:new(40, 40, 16))
     local picker = ui:add(UIPicker:new(
         palette.x + palette.w + palette.scale, palette.y,
         -palette.x, palette.h
