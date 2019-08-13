@@ -1,7 +1,7 @@
 
 local draw = {}
 
-local tpcy_default = {
+draw.tpcy_default = {
     {0.2, 0.2, 0.2},
     {0.5, 0.5, 0.5},
 }
@@ -9,7 +9,7 @@ local tpcy_default = {
 function draw.tpcy(x, y, cw, ch, nx, ny, tpcy)
     nx = nx or 1
     ny = ny or 1
-    tpcy = tpcy or tpcy_default
+    tpcy = tpcy or draw.tpcy_default
 
     love.graphics.setColor(tpcy[1])
     love.graphics.rectangle('fill', x, y, cw * nx, ch * nx)

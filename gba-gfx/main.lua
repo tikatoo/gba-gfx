@@ -12,13 +12,17 @@ local data = nil
 function love.load()
     ui = UIRoot:new()
     ui:add(UIShow:new({0.15, 0.15, 0.15}))
-    local palette = ui:add(UIPalette:new(40, 40, 16))
+    local palettes = ui:add(UIPalette:new(40, 40, 16))
+    local palette = ui:add(UIPalette:new(
+        palettes.x + palettes.w + palettes.scale, palettes.y,
+        palettes.scale
+    ))
     local picker = ui:add(UIPicker:new(
         palette.x + palette.w + palette.scale, palette.y,
-        -palette.x, palette.h
+        -palettes.x, palette.h
     ))
     local canvas = ui:add(UICanvas:new(
-        40, 40 + 4 * palette.scale + 40, 16
+        palette.x, palette.y + palette.h + 32, 16
     ))
 
     local errmsg
@@ -40,7 +44,7 @@ function love.load()
             objs = {},
         }
     end
-    if #data.palettes < 1 then
+    while #data.palettes < 16 do
         table.insert(data.palettes, export.palette())
     end
     if #data.tiles < 1 then
@@ -50,16 +54,23 @@ function love.load()
         table.insert(data.objs, { w = 1, h = 1, palette = 0, tile = 0 })
     end
 
-    local obj = data.objs[1]
-
-    palette.palette = data.palettes[obj.palette + 1]
-    canvas:settile(data.tiles[obj.tile + 1])
-    canvas.palette = palette.palette
-    canvas.selected = palette.selected
+    local objid = 1
+    function palettes.onselect(n)
+        local selpal = data.palettes[n + 1]
+        palette.palette = selpal
+        canvas.palette = selpal
+        data.objs[objid].palette = n
+        palette:select(palette.selected)
+    end
     function palette.onselect(n)
         picker:setcolor(palette.palette[n])
         canvas.selected = n
     end
+
+    palettes.palettes = data.palettes
+    local obj = data.objs[objid]
+    canvas:settile(data.tiles[obj.tile + 1])
+    palettes:select(obj.palette)
 end
 
 function love.quit()

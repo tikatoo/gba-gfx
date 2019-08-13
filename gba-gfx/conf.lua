@@ -6,6 +6,6 @@ function love.conf(t)
     t.accelerometerjoystick = false
 
     t.window.title = 'GBA Graphics Editor'
-    t.window.width = 1040
-    t.window.height = 824
+    t.window.width = 1160
+    t.window.height = 816
 end

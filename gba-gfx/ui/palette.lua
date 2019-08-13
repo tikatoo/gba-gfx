@@ -1,5 +1,6 @@
 local UIWidget = require('ui.widget')
 local draw = require('ui.drawutil')
+local export = require('export')
 
 local UIPallete = UIWidget:extend()
 
@@ -7,21 +8,59 @@ function UIPallete:init(x, y, scale)
     UIWidget.init(self, x, y, 4 * scale, 4 * scale)
     self.scale = scale
     self.palette = nil
+    self.palettes = nil
     self.selected = 0
     function self.onselect(n) end
 end
 
-function UIPallete:draw()
-    if self.palette == nil then return end
+function UIPallete:select(n)
+    self.selected = n
+    self.onselect(n)
+end
 
-    local s = self.scale
-    draw.tpcy(0, 0, s, s)
-
-    for i, c in ipairs(self.palette) do
+local function drawpalette(palette, s)
+    if s < 8 then
+        love.graphics.setColor(draw.tpcy_default[2])
+        love.graphics.rectangle('fill', 0, 0, s, s)
+    else
+        draw.tpcy(0, 0, s, s)
+    end
+    for i, c in ipairs(palette) do
         local x = i % 4
         local y = (i - x) / 4
         love.graphics.setColor(draw.gbacolor(c))
         love.graphics.rectangle('fill', x * s, y * s, s, s)
+    end
+end
+
+function UIPallete:draw()
+    local s = self.scale
+    if self.palette ~= nil then
+        -- Main palette
+        drawpalette(self.palette, s)
+    elseif self.palettes ~= nil then
+        -- Full palette set
+        local qs = s / 4
+        love.graphics.push()
+        love.graphics.setLineWidth(1)
+        for i = 1, 16 do
+            local palette = self.palettes[i]
+            if palette == nil then
+                palette = export.palette()
+            end
+            drawpalette(palette, qs)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle('line', 0, 0, s, s)
+            if i % 4 == 0 then
+                love.graphics.translate(-(s*3), s)
+            else
+                love.graphics.translate(s, 0)
+            end
+        end
+        love.graphics.pop()
+    else
+        -- No palette!
+        return
     end
 
     love.graphics.setLineWidth(1)
@@ -41,10 +80,10 @@ function UIPallete:mousepressed(x, y, btn, istouch, presses)
     end
 
     if btn == 1 then
-        self.selected =
+        self:select(
             math.floor(x / self.scale)
             + (4 * math.floor(y / self.scale))
-        self.onselect(self.selected)
+        )
         return true
     end
 end

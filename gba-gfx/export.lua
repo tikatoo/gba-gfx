@@ -6,13 +6,19 @@ local function swap16(x)
     return bit.bswap(bit.lshift(x, 16))
 end
 
+local _emptypalette =
+    '000000000000000' ..
+    '000000000000000' ..
+    '000000000000000' ..
+    '000000000000000'
+
 function export.palette(palette)
     if palette == nil then
         return {
             {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
             {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
             {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
-            {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {31, 31, 31},
+            {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
         }
     elseif type(palette) == 'table' then
         -- Encoding palette
@@ -171,9 +177,20 @@ function export.save(filename, data)
     status, msg = file:write('% gba-gfx\n')
     if not status then return status, msg end
 
+    local skipped = 0
     for i, palette in ipairs(data.palettes) do
-        status, msg = file:write('p ' .. export.palette(palette) .. '\n')
-        if not status then return status, msg end
+        local encoded = export.palette(palette)
+        if encoded == _emptypalette then
+            skipped = skipped + 1
+        else
+            for i = 1, skipped do
+                status, msg = file:write('p ' .. _emptypalette .. '\n')
+                if not status then return status, msg end
+            end
+            skipped = 0
+            status, msg = file:write('p ' .. encoded .. '\n')
+            if not status then return status, msg end
+        end
     end
 
     for i, tile in ipairs(data.tiles) do
