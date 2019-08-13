@@ -1,6 +1,6 @@
 local export = require('export')
 local UIRoot = require('ui')
-local UIShow = require('ui.show')
+local UIWidget = require('ui.widget')
 local UIPalette = require('ui.palette')
 local UIPicker = require('ui.picker')
 local UICanvas = require('ui.canvas')
@@ -11,7 +11,8 @@ local data = nil
 
 function love.load()
     ui = UIRoot:new()
-    ui:add(UIShow:new({0.15, 0.15, 0.15}))
+    ui:add(UIWidget:new(0, 0)).background = {0.15, 0.15, 0.15}
+
     local palettes = ui:add(UIPalette:new(40, 40, 16))
     local palette = ui:add(UIPalette:new(
         palettes.x + palettes.w + palettes.scale, palettes.y,

@@ -2,7 +2,6 @@ local class = require('class')
 
 local UIWidget = class:extend()
 
-
 function UIWidget:init(x, y, w, h)
     self.parent = nil
     self.children = {}
@@ -12,6 +11,7 @@ function UIWidget:init(x, y, w, h)
     self.h = h
     self.focus = nil
     self.transform = nil
+    self.background = nil
     self._mouseactive = nil
     if parent ~= nil then
         parent:add(self)
@@ -77,7 +77,32 @@ function UIWidget:do_draw()
 end
 
 function UIWidget:update(dt) end
-function UIWidget:draw() end
+
+function UIWidget:draw()
+    if self.background == nil then return end
+
+    if type(self.background.typeOf) == 'function' then
+        if self.background:typeOf('Texture') then
+            local bw, bh = self.background:getPixelDimensions()
+            local sx = 1
+            local sy = 1
+            local bx = 0
+            local by = 0
+            if self.w < bw then sx = self.w / bw
+            else bx = (self.w / 2) - (bw / 2)
+            end
+            if self.h < bh then sy = self.h / bh
+            else by = (self.h / 2) - (bh / 2)
+            end
+            love.graphics.draw(self.background, bx, by, 0, sx, sy)
+        elseif self.background:typeOf('Drawable') then
+            love.graphics.draw(self.background)
+        end
+    elseif type(self.background) == 'table' then
+        love.graphics.setColor(self.background)
+        love.graphics.rectangle('fill', 0, 0, self.w, self.h)
+    end
+end
 
 local function revpairs(t)
     return function (s, var)
@@ -156,6 +181,5 @@ function UIWidget:wheelmoved(x, y, atx, aty)
         return child:wheelmoved(x, y, atx, aty)
     end
 end
-
 
 return UIWidget
