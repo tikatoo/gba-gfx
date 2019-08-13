@@ -22,7 +22,8 @@ function love.load()
         -palettes.x, palette.h
     ))
     local canvas = ui:add(UICanvas:new(
-        palette.x, palette.y + palette.h + 32, 16
+        palette.x, palette.y + palette.h + 32,
+        960, 640, 10
     ))
 
     local errmsg
@@ -69,7 +70,7 @@ function love.load()
 
     palettes.palettes = data.palettes
     local obj = data.objs[objid]
-    canvas:settile(data.tiles[obj.tile + 1])
+    canvas:setobj(obj, data.tiles)
     palettes:select(obj.palette)
 end
 

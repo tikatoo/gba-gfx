@@ -12,7 +12,7 @@ function draw.tpcy(x, y, cw, ch, nx, ny, tpcy)
     tpcy = tpcy or draw.tpcy_default
 
     love.graphics.setColor(tpcy[1])
-    love.graphics.rectangle('fill', x, y, cw * nx, ch * nx)
+    love.graphics.rectangle('fill', x, y, cw * nx, ch * ny)
 
     local hw = cw / 2
     local hh = ch / 2
