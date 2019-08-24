@@ -6,7 +6,7 @@ clean:
 clean-save:
 	rm -f ~/.local/share/love/gba-gfx/savedata.gfx
 
-LUA := $(shell find gba-gfx -name '*.lua')
+LUA := $(shell find gba-gfx -type f)
 
 gba-gfx.love: $(LUA)
 	cd gba-gfx; \
