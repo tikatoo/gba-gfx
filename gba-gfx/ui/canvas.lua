@@ -7,9 +7,7 @@ function UICanvas:init(x, y, w, h, scale)
     UIWidget.init(self, x, y, w, h)
     self.scale = scale
     self.obj = nil
-    self.palette = nil
     self.selected = 0
-    self.tiles = nil
     self.tileundo = nil
     self.tilestroke = nil
     self.painting = false
@@ -17,10 +15,9 @@ function UICanvas:init(x, y, w, h, scale)
     self.onchange = nil
 end
 
-function UICanvas:setobj(obj, tiles)
+function UICanvas:setobj(obj)
     self.obj = obj or self.obj
-    self.tiles = tiles or self.tiles
-    if self.obj == nil or self.tiles == nil then return end
+    if self.obj == nil then return end
 
     self.changed = false
     self.tileundo = {}
@@ -43,24 +40,22 @@ local function tileiter(w, h)
 end
 
 function UICanvas:draw()
-    if
-        self.obj == nil or
-        self.tiles == nil or
-        self.palette == nil
-    then return end
+    if self.obj == nil then return end
 
     local s = self.scale
+    local obj = self.obj
+    local palette = obj.palettes[obj.palette + 1]
 
-    draw.tpcy(0, 0, s, s, 8 * self.obj.w, 8 * self.obj.h)
-    for i, tx, ty in tileiter(self.obj.w, self.obj.h) do
+    draw.tpcy(0, 0, s, s, 8 * obj.w, 8 * obj.h)
+    for i, tx, ty in tileiter(obj.w, obj.h) do
         local tpx = 8 * s * tx
         local tpy = 8 * s * ty
-        for j, v in ipairs(self.tiles[self.obj.tile + i + 1]) do
+        for j, v in ipairs(obj.tiles[obj.tile + i + 1]) do
             if v > 0 then
                 j = j - 1
                 local x = j % 8
                 local y = (j - x) / 8
-                local c = self.palette[v]
+                local c = palette[v]
                 love.graphics.setColor(draw.gbacolor(c))
                 love.graphics.rectangle(
                     'fill', tpx + x * s, tpy + y * s, s, s
@@ -72,7 +67,7 @@ function UICanvas:draw()
     love.graphics.setLineWidth(2)
     love.graphics.setColor(1, 1, 1)
     love.graphics.rectangle(
-        'line', 0, 0, 8 * s * self.obj.w, 8 * s * self.obj.h
+        'line', 0, 0, 8 * s * obj.w, 8 * s * obj.h
     )
 end
 
@@ -87,7 +82,7 @@ function UICanvas:paint(x, y)
         local tx = (xg - inx) / 8
         local ty = (yg - iny) / 8
         local tidx = tx + self.obj.w * ty + 1
-        local tile = self.tiles[tidx]
+        local tile = self.obj.tiles[tidx]
         local tileundo = self.tileundo[tidx]
         local tilestroke = self.tilestroke[tidx]
         if tilestroke[inidx] then return end
@@ -114,11 +109,7 @@ end
 function UICanvas:mousepressed(x, y, btn, istouch, presses)
     if UIWidget.mousepressed(self, x, y, btn, istouch, presses) then
         return true
-    elseif
-        self.obj == nil or
-        self.tiles == nil or
-        self.palette == nil
-    then
+    elseif self.obj == nil then
         return false
     elseif btn == 1 and not self.painting then
         self.painting = 'paint'

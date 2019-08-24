@@ -113,7 +113,7 @@ function love.load()
 
     palettes.palettes = data.palettes
     local obj = data.objs[objid]
-    canvas:setobj(obj, data.tiles)
+    canvas:setobj(obj)
     palettes:select(obj.palette)
     shapebtn:setshape(obj.shape)
     sizebtn:setsize(obj.size)
