@@ -1,2 +1,4 @@
 *.luac
 *.love
+*.zip
+/love-*
