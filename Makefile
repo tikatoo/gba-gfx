@@ -1,20 +1,35 @@
-none:
-	@echo 'No default target - please specify one explicitly.'
-.PHONY: none clean clean-save
-clean:
-	rm -f gba-gfx.love
-clean-save:
-	rm -f ~/.local/share/love/gba-gfx/savedata.gfx
+
+APP := gba-gfx
+LOVEVER := 11.2
 
 LUA := $(shell find gba-gfx -type f)
+LOVEWIN := love-$(LOVEVER)-win32
+APPLOVE := $(APP).love
+APPEXE := $(LOVEWIN)/$(APP).exe
+APPZIPWIN := $(APP)-win32.zip
 
-gba-gfx.love: $(LUA)
-	cd gba-gfx; \
-	zip ../$@ $(LUA:gba-gfx/%=%)
+none:
+	@echo 'No default target - please specify one explicitly:'
+	@echo '- love : makes $(APPLOVE)'
+	@echo '- dist : makes files for distribution:'
+	@echo '         $(APPLOVE); $(APPZIPWIN).'
+	@echo '- clean : clean built files'
+	@echo '- clean-save : handy shortcut to remove save file'
+.PHONY: none love dist clean clean-save
+love: $(APPLOVE)
+dist: $(APPZIPWIN)
+clean:
+	rm -f $(APPLOVE) $(APPZIPWIN) $(APPEXE)
+clean-save:
+	rm -f ~/.local/share/love/$(APP)/savedata.gfx
 
-gba-gfx-win32.zip: love-11.2-win32/gba-gfx.exe
-	cd love-11.2-win32; \
+$(APPLOVE): $(LUA)
+	cd $(APP); \
+	zip ../$@ $(LUA:$(APP)/%=%)
+
+$(APPZIPWIN): $(APPEXE)
+	cd $(LOVEWIN); \
 	zip ../$@ $$(find . -not -name love.exe)
 
-love-11.2-win32/gba-gfx.exe: love-11.2-win32/love.exe gba-gfx.love
+$(APPEXE): $(LOVEWIN)/love.exe $(APPLOVE)
 	cat $^ > $@
