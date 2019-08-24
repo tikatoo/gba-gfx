@@ -15,7 +15,13 @@ function love.load()
             love.graphics.newImage('res/shape-square.png'),
             love.graphics.newImage('res/shape-horz.png'),
             love.graphics.newImage('res/shape-vert.png'),
-        }
+        },
+        size = {
+            love.graphics.newImage('res/size-s.png'),
+            love.graphics.newImage('res/size-m.png'),
+            love.graphics.newImage('res/size-l.png'),
+            love.graphics.newImage('res/size-x.png'),
+        },
     }
 
     ui = UIRoot:new()
@@ -38,9 +44,15 @@ function love.load()
     local shapebtn = ui:add(UIWidget:new(
         palette.x + 4, palette.y + palette.h + 8, 16, 16
     ))
+    local sizebtn = ui:add(UIWidget:new(
+        shapebtn.x + shapebtn.w * 2, shapebtn.y, 16, 16
+    ))
 
     function shapebtn:setshape(shape)
         self.background = img.shape[shape + 1]
+    end
+    function sizebtn:setsize(size)
+        self.background = img.size[size + 1]
     end
 
     local file, errmsg = love.filesystem.newFile('savedata.gfx', 'r')
@@ -90,12 +102,21 @@ function love.load()
             self:setshape(obj.shape)
         end
     end
+    function sizebtn:mousereleased(x, y, btn)
+        if btn == 1 then
+            local obj = data.objs[objid]
+            obj:resize(obj.shape, (obj.size + 1) % 4)
+            canvas:setobj(obj)
+            self:setsize(obj.size)
+        end
+    end
 
     palettes.palettes = data.palettes
     local obj = data.objs[objid]
     canvas:setobj(obj, data.tiles)
     palettes:select(obj.palette)
     shapebtn:setshape(obj.shape)
+    sizebtn:setsize(obj.size)
 end
 
 function love.quit()
