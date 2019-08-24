@@ -1,6 +1,5 @@
 local UIWidget = require('ui.widget')
 local draw = require('ui.drawutil')
-local export = require('export')
 
 local UIPallete = UIWidget:extend()
 
@@ -45,9 +44,6 @@ function UIPallete:draw()
         love.graphics.setLineWidth(1)
         for i = 1, 16 do
             local palette = self.palettes[i]
-            if palette == nil then
-                palette = export.palette()
-            end
             drawpalette(palette, qs)
             love.graphics.setColor(1, 1, 1)
             love.graphics.rectangle('line', 0, 0, s, s)

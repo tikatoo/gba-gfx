@@ -1,6 +1,6 @@
 local UIWidget = require('ui.widget')
 local draw = require('ui.drawutil')
-local export = require('export')
+local sprites = require('sprites')
 
 local UICanvas = UIWidget:extend()
 function UICanvas:init(x, y, w, h, scale)
@@ -23,8 +23,8 @@ function UICanvas:setobj(obj, tiles)
     self.tileundo = {}
     self.tilestroke = {}
     for i = 1, self.obj.w * self.obj.h do
-        table.insert(self.tileundo, export.tile())
-        table.insert(self.tilestroke, export.tile(nil, false))
+        table.insert(self.tileundo, sprites.newtile())
+        table.insert(self.tilestroke, sprites.newtile(nil, false))
     end
 end
 
