@@ -20,6 +20,19 @@ local function newtile(v)
     }
 end
 
+local function copytile(t)
+    return {
+        t[ 1], t[ 2], t[ 3], t[ 4], t[ 5], t[ 6], t[ 7], t[ 8],
+        t[ 9], t[10], t[11], t[12], t[13], t[14], t[15], t[16],
+        t[17], t[18], t[19], t[20], t[21], t[22], t[23], t[24],
+        t[25], t[26], t[27], t[28], t[29], t[30], t[31], t[32],
+        t[33], t[34], t[35], t[36], t[37], t[38], t[39], t[40],
+        t[41], t[42], t[43], t[44], t[45], t[46], t[47], t[48],
+        t[49], t[50], t[51], t[52], t[53], t[54], t[55], t[56],
+        t[57], t[58], t[59], t[60], t[61], t[62], t[63], t[64],
+    }
+end
+
 local function newpalette()
     return {
         {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
@@ -52,17 +65,19 @@ local function getdims(shape, size)
 end
 
 
-function Sprite:init(obj, tiles, palettes)
-    self.tiles = tiles
-    self.palettes = palettes
+function Sprite:init(obj, set)
+    self.set = set
+    self.tiles = set.tiles
+    self.palettes = set.palettes
 
     if obj == nil then
-        obj = { tile = #tiles, palette = 0, shape = 0, size = 0 }
+        obj = { tile = #self.tiles, palette = 0, shape = 0, size = 0 }
         table.insert(self.tiles, newtile())
     end
     self.tile = obj.tile
     self.palette = obj.palette
     self:_resize(obj.shape, obj.size)
+    self:setchanged()
 end
 
 function Sprite:_resize(shape, size)
@@ -75,13 +90,36 @@ function Sprite:_resize(shape, size)
     return shape, size
 end
 
-function Sprite:__len()
-    return self.len
+function Sprite:setchanged()
+    self.original = nil
 end
 
 function Sprite:resize(shape, size)
+    local startlen = self.len
+    local startw = self.w
+    if self.original == nil then
+        self.original = { shape = self.shape, size = self.size,
+                          w = self.w, h = self.h }
+        for i = 1, startlen do
+            table.insert(self.original, copytile(self.tiles[self.tile + i]))
+        end
+    end
+
     shape, size = self:_resize(shape, size)
-    -- TODO: Correct tiles
+
+    self.set:shift(self.tile, startlen, self.len)
+
+    for i = 1, self.len do
+        local xi = i - 1
+        local x = xi % self.w
+        local y = (xi - x) / self.w
+        if x < self.original.w and y < self.original.h then
+            local oi = (y * self.original.w) + x
+            self.tiles[self.tile + i] = copytile(self.original[oi + 1])
+        else
+            self.tiles[self.tile + i] = newtile()
+        end
+    end
 end
 
 
@@ -97,7 +135,7 @@ function Spriteset:init(objs, tiles, palettes, settings)
     self.objs = {}
     if objs ~= nil then
         for i, obj in ipairs(objs) do
-            table.insert(self.objs, Sprite:new(obj, self.tiles, self.palettes))
+            table.insert(self.objs, Sprite:new(obj, self))
         end
     end
 end
@@ -107,9 +145,36 @@ function Spriteset:encode(writeline)
 end
 
 function Spriteset:newsprite()
-    local obj = Sprite:new(nil, self.tiles, self.palettes)
+    local obj = Sprite:new(nil, self)
     table.insert(self.objs, obj)
     return #self.objs, obj
+end
+
+function Spriteset:shift(tile, oldlen, newlen)
+    local shiftby = newlen - oldlen
+
+    if shiftby == 0 then
+        -- No change happening
+        return
+    elseif shiftby > 0 then
+        -- Need to insert some tiles
+        for i = oldlen + 1, newlen do
+            -- Tile must be manually populated after this function
+            table.insert(self.tiles, tile + i, {})
+        end
+    elseif shiftby < 0 then
+        -- Need to remove some tiles
+        for i = oldlen, newlen + 1, -1 do
+            table.remove(self.tiles, tile + i)
+        end
+    end
+
+    -- Update objects
+    for i, obj in ipairs(self.objs) do
+        if obj.tile > tile then
+            obj.tile = obj.tile + shiftby
+        end
+    end
 end
 
 

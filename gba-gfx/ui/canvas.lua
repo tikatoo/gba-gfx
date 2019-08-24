@@ -13,6 +13,8 @@ function UICanvas:init(x, y, w, h, scale)
     self.tileundo = nil
     self.tilestroke = nil
     self.painting = false
+    self.changed = false
+    self.onchange = nil
 end
 
 function UICanvas:setobj(obj, tiles)
@@ -20,11 +22,12 @@ function UICanvas:setobj(obj, tiles)
     self.tiles = tiles or self.tiles
     if self.obj == nil or self.tiles == nil then return end
 
+    self.changed = false
     self.tileundo = {}
     self.tilestroke = {}
     for i = 1, self.obj.w * self.obj.h do
         table.insert(self.tileundo, sprites.newtile())
-        table.insert(self.tilestroke, sprites.newtile(nil, false))
+        table.insert(self.tilestroke, sprites.newtile(false))
     end
 end
 
@@ -98,6 +101,13 @@ function UICanvas:paint(x, y)
             tile[inidx] = tileundo[inidx]
             tileundo[inidx] = current
         end
+
+        if not self.changed then
+            self.changed = true
+            if self.onchange ~= nil then
+                self.onchange()
+            end
+        end
     end
 end
 
@@ -130,7 +140,7 @@ function UICanvas:mousereleased(x, y, btn, istouch, presses)
         self.painting = false
         self.tilestroke = {}
         for i = 1, #self.tileundo do
-            table.insert(self.tilestroke, export.tile(nil, false))
+            table.insert(self.tilestroke, sprites.newtile(false))
         end
     end
 end

@@ -10,6 +10,14 @@ local ui = nil
 local data = nil
 
 function love.load()
+    local img = {
+        shape = {
+            love.graphics.newImage('res/shape-square.png'),
+            love.graphics.newImage('res/shape-horz.png'),
+            love.graphics.newImage('res/shape-vert.png'),
+        }
+    }
+
     ui = UIRoot:new()
     ui:add(UIWidget:new(0, 0)).background = {0.15, 0.15, 0.15}
 
@@ -27,13 +35,21 @@ function love.load()
         960, 640, 10
     ))
 
+    local shapebtn = ui:add(UIWidget:new(
+        palette.x + 4, palette.y + palette.h + 8, 16, 16
+    ))
+
+    function shapebtn:setshape(shape)
+        self.background = img.shape[shape + 1]
+    end
+
     local file, errmsg = love.filesystem.newFile('savedata.gfx', 'r')
     if file == nil then
         print('load error', errmsg)
     else
         data, errmsg = sprites.load(file:lines())
-    if data == nil then
-        print('load error', errmsg)
+        if data == nil then
+            print('load error', errmsg)
             -- The file exists, but is broken.
             -- Give users the chance to fix the file.
             local savedir = love.filesystem.getSaveDirectory()
@@ -63,11 +79,23 @@ function love.load()
         picker:setcolor(palette.palette[n])
         canvas.selected = n
     end
+    function canvas.onchange()
+        data.objs[objid].original = nil
+    end
+    function shapebtn:mousereleased(x, y, btn)
+        if btn == 1 then
+            local obj = data.objs[objid]
+            obj:resize((obj.shape + 1) % 3)
+            canvas:setobj(obj)
+            self:setshape(obj.shape)
+        end
+    end
 
     palettes.palettes = data.palettes
     local obj = data.objs[objid]
     canvas:setobj(obj, data.tiles)
     palettes:select(obj.palette)
+    shapebtn:setshape(obj.shape)
 end
 
 function love.quit()
