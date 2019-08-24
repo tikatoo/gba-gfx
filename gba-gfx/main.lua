@@ -42,7 +42,7 @@ function love.load()
     ))
 
     local shapebtn = ui:add(UIWidget:new(
-        palette.x + 4, palette.y + palette.h + 8, 16, 16
+        palette.x + 8, palette.y + palette.h + 8, 16, 16
     ))
     local sizebtn = ui:add(UIWidget:new(
         shapebtn.x + shapebtn.w * 2, shapebtn.y, 16, 16
